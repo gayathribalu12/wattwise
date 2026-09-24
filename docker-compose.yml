@@ -9,6 +9,7 @@ services:
       - "9090:9090"
     depends_on:
       - node-exporter
+      - cadvisor
 
   grafana:
     image: grafana/grafana:latest
@@ -23,7 +24,24 @@ services:
     container_name: wattwise-node-exporter
     ports:
       - "9100:9100"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: wattwise-cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+
   cpu-worker:
     build:
       context: ./workloads/cpu_worker
     container_name: wattwise-cpu-worker
+
+  memory-worker:
+    build:
+      context: ./workloads/memory_worker
+    container_name: wattwise-memory-worker

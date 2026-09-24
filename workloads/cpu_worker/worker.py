@@ -1,17 +1,15 @@
 import time
-import math
 
-print("WATTWISE CPU workload started")
+print("WATTWISE memory workload started", flush=True)
+
+blocks = []
 
 while True:
-    start = time.time()
+    blocks.append(bytearray(100 * 1024 * 1024))
 
-    # Controlled CPU computation
-    while time.time() - start < 10:
-        x = 0.0
-        for i in range(1, 500000):
-            x += math.sqrt(i) * math.sin(i)
+    print(
+        f"Allocated approximately {len(blocks) * 100} MB",
+        flush=True,
+    )
 
-    print("Completed workload batch")
-    time.sleep(2)
-
+    time.sleep(5)
