@@ -1,3 +1,4 @@
+from .prometheus_client import get_node_metrics
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -37,6 +38,49 @@ def health():
     return {
         "status": "healthy",
     }
+
+@app.get("/nodes")
+def get_nodes():
+    node = get_node_metrics()
+
+    return {
+        "nodes": [node]
+    }
+
+@app.post("/optimize-live")
+def optimize_live_workload(
+    cpu_required: float = 10,
+    memory_required: float = 5,
+):
+    node = get_node_metrics()
+
+    if node["cpu_percent"] is None or node["memory_percent"] is None:
+        return {
+            "status": "ERROR",
+            "reason": "Live Prometheus metrics unavailable.",
+        }
+
+    live_node = NodeRequest(
+        node_id=node["node_id"],
+        cpu_percent=node["cpu_percent"],
+        memory_percent=node["memory_percent"],
+        temperature_c=50.0,
+    )
+
+    nodes = [
+        NodeState(
+            node_id=live_node.node_id,
+            cpu_percent=live_node.cpu_percent,
+            memory_percent=live_node.memory_percent,
+            temperature_c=live_node.temperature_c,
+        )
+    ]
+
+    return optimize(
+        nodes=nodes,
+        cpu_required=cpu_required,
+        memory_required=memory_required,
+    )
 
 
 @app.post("/optimize")
